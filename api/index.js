@@ -1,15 +1,42 @@
 import express from 'express';
-import { User, addDoc } from './config.js';
-const app = express();
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import User from './models/user.model.js'; // Import the createUser function, not the User model
+import userRouter from './routes/user.route.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
+const firebaseConfig = {
+    apiKey: process.env.API_KEY,
+    authDomain: process.env.AUTH_DOMAIN,
+    projectId: process.env.PROJECT_ID,
+    storageBucket: process.env.STOREAGE_BUCKET,
+    messagingSenderId: process.env.MESSAGING_SENDER_ID,
+    appId: process.env.APP_ID,
+};
+
+// Initialize Firebase
+let firebaseApp;
+try {
+    firebaseApp = initializeApp(firebaseConfig);
+    console.log('Connected to Firebase!');
+} catch (error) {
+    console.error('Error connecting to Firebase:', error);
+}
+
+let db;
+try {
+    db = getFirestore(firebaseApp);
+    console.log('Firestore database connected!');
+} catch (error) {
+    console.error('Error connecting to Firestore:', error);
+}
+
+const app = express();
 app.use(express.json());
 
-app.post('/create', async (req, res) => {
-  const data=req.body;
-  await addDoc(User,data);
-  res.send({msg: "User Created"});
-})
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
 
+app.use('/api/user',userRouter);
