@@ -1,8 +1,9 @@
 import { addDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import bcryptjs from 'bcryptjs';
 import { db } from "../index.js";
+import { errorHandler } from '../utils/error.js';
 
-export const signup = async (req, res) => {
+export const signup = async (req, res, next) => {
     const { username, email, password } = req.body;
   
     // Check if a user with the same username and email already exists
@@ -25,10 +26,9 @@ export const signup = async (req, res) => {
     try {
       // Add the new user to the Firestore "users" collection
       const docRef = await addDoc(usersCollection, newUser);
-      console.log('User added with ID:', docRef.id);
+      //console.log('User added with ID:', docRef.id);
       res.status(201).json("User created Successfully");
     } catch (error) {
-      console.error('Error adding user:', error);
-      res.status(500).json(error.message);
+      next(error);
     }
 };
